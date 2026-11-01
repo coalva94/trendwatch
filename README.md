@@ -1,103 +1,55 @@
 # trendwatch
 
-**English.** Sector-scoped market watch. You configure an industry, topics and public RSS feeds. A daily job reads the feeds, asks an LLM to score each headline (relevance 0–3 plus a reason) and groups the same story across outlets. A weekly job writes a brief: trends, opportunities, alerts and upcoming events. The dashboard never deletes an item; discard is reversible. Demo mode runs with synthetic headlines and real public feed URLs, with no Supabase or Gemini keys. All stored data is public or fake.
+**Las señales de tu sector, clasificadas cada día y resumidas cada semana.**
+
+**English.** A market watch you configure for any industry. Public RSS feeds come in. Headlines get a relevance score and a reason, the same story is grouped across outlets, and a weekly brief lists trends, opportunities, alerts and upcoming events. People review the queue. Discard is reversible. Demo mode runs with no API keys. All stored data is public or fake.
 
 [![CI](https://github.com/coalva94/trendwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/coalva94/trendwatch/actions/workflows/ci.yml)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-16a34a)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-App%20Router-111111)](https://nextjs.org)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ecf8e)](https://supabase.com)
+[![Python](https://img.shields.io/badge/Python-3.11-3776ab)](https://www.python.org)
+[![Gemini](https://img.shields.io/badge/Gemini-clasifica-8b5cf6)](https://ai.google.dev)
 
-## Para qué sirve
+![Panel de trendwatch: KPIs de la semana, actividad y cola de revisión en modo oscuro](docs/screenshots/home.png)
 
-trendwatch es una vigilancia de mercado por sector. El sector, los temas y las fuentes viven en datos, no en el código. El ejemplo que viene en el repo es **energía renovable**: solar, eólica, almacenamiento, redes y política, con feeds públicos reales (Google News, pv magazine, CleanTechnica, Canary Media, Renewable Energy World).
+## El problema
 
-Una persona revisa la cola: marca una noticia como interesante, para seguir, o descartada. Descartar no borra. Un informe semanal resume lo ya clasificado. El modelo no publica, no contacta a nadie y no ejecuta acciones.
+Quien sigue un mercado abre varios medios, busca a mano y pega titulares en una hoja. La misma noticia aparece tres veces. Una señal de precio, de regulación o de un contrato se mezcla con lo que no cambia nada. El tiempo se va en leer, y lo importante llega tarde o no llega.
 
-Hecho como proyecto de portafolio por [Carlos Alva](https://github.com/coalva94).
+trendwatch hace esa lectura repetitiva. Trae feeds públicos del sector, puntúa cada titular y deja una cola corta para una persona. El lunes hay un informe con lo que la semana dejó.
 
-## Pantallas
+## Para quién es
 
-Modo demo, sin claves. La interfaz abre en modo oscuro; el interruptor de la barra lateral pasa a claro.
+- **Pymes** que vigilan su mercado sin un equipo de research.
+- **Ventas y estrategia**, que necesitan señales para una conversación, no otra pestaña abierta.
+- **Consultoras** que siguen el sector de cada cliente con las mismas reglas.
+- **Cualquier industria.** El sector, los temas y las fuentes viven en datos. El ejemplo del repo es energía renovable; el siguiente puede ser el tuyo.
 
-![Inicio: KPIs de 7 días, cola de revisión, sincronización e informe](docs/screenshots/home.png)
+## Qué te llevas
 
-![Feed con búsqueda, filtros y la misma historia en varios medios](docs/screenshots/feed.png)
+- 📥 **La mañana, en una cola.** Cada día se leen los feeds y cada titular llega con relevancia de 0 a 3 y un motivo.
+- 🎯 **Prioridad visible.** Lo prioritario y lo relevante se distinguen de un vistazo. Lo tangencial no ocupa el mismo sitio.
+- 🗂️ **Una historia, una ficha.** Si varios medios cuentan lo mismo, el panel los agrupa.
+- 📅 **El lunes, un informe.** Tendencias, oportunidades, alertas y eventos de la semana, escritos a partir de lo ya clasificado.
+- ↩️ **La persona decide.** Interesante, seguir o descartar. Descartar se deshace. La noticia sigue en el archivo.
+- 🧩 **Tu sector, en un archivo.** Temas, palabras clave y URLs públicas van en un JSON. El ejemplo del repo es energía renovable.
+- 🩺 **Fuentes con pulso.** Última lectura y último error, en la misma pantalla donde se añade un feed.
+- ▶️ **Se puede enseñar ya.** El modo demo abre el panel con titulares de ejemplo y sin claves.
 
-![Fuentes: salud de cada feed y alta con validación en el servidor](docs/screenshots/sources.png)
+## El panel
+
+Modo demo, tema oscuro. El interruptor de la barra lateral pasa a claro.
+
+![Feed: búsqueda, filtros y la misma historia en varios medios](docs/screenshots/feed.png)
+
+![Fuentes: salud de cada feed y alta con validación](docs/screenshots/sources.png)
 
 ![Informe semanal: tendencias, oportunidades, alertas y eventos](docs/screenshots/report.png)
 
-## Arquitectura
+## Pruébalo en 1 minuto
 
-```mermaid
-flowchart LR
-  subgraph web [Next.js]
-    UI[Inicio, feed, fuentes, informe]
-    VAL[Validación del feed]
-  end
-  subgraph jobs [Python 3.11]
-    ING[Ingesta diaria]
-    DUP[Agrupar duplicados]
-    REP[Informe semanal]
-  end
-  LLM[Interfaz LLM]
-  GEM[Gemini]
-  DB[(Postgres o modo demo)]
-  RSS[Feeds RSS públicos]
-
-  UI --> DB
-  VAL --> RSS
-  ING --> RSS
-  ING --> LLM
-  DUP --> LLM
-  REP --> LLM
-  LLM --> GEM
-  ING --> DB
-  DUP --> DB
-  REP --> DB
-```
-
-La ingesta diaria también agrupa duplicados al final. `scripts/dedup.py` permite repetir solo ese paso. Los tests sustituyen la base y el modelo por dobles en memoria: no hace falta red ni secretos.
-
-## Modelo de datos
-
-```mermaid
-erDiagram
-  sectors ||--o{ topics : tiene
-  sectors ||--o{ sources : tiene
-  sectors ||--o{ items : tiene
-  sectors ||--o{ clusters : tiene
-  sectors ||--o{ sync_runs : tiene
-  sectors ||--o{ weekly_reports : tiene
-  sources ||--o{ items : publica
-  topics ||--o{ items : clasifica
-  clusters ||--o{ items : agrupa
-```
-
-| Tabla | Qué guarda |
-| --- | --- |
-| `sectors` | Industria activa. El slug elige cuál muestra la app. |
-| `topics` | Temas y keywords. Sirven de pista al modelo y al doble de pruebas. |
-| `sources` | URL pública, tipo (`rss` o `google_news`), última lectura y último error. |
-| `items` | Titular, enlace, extracto, relevancia 0–3, motivo y estado de revisión. |
-| `clusters` | Misma historia en varios medios. La huella sale de los tokens compartidos. |
-| `sync_runs` | Cada ingesta, reagrupado o informe. |
-| `weekly_reports` | Tendencias, oportunidades, alertas, eventos y una narrativa. |
-
-El estado de una noticia es `pending`, `interesting`, `follow` o `discarded`. No hay borrado desde la interfaz. En Supabase, RLS deja leer a `anon` y `authenticated`. Un usuario autenticado solo puede cambiar el estado de revisión (un trigger impide tocar el resto de columnas). Los jobs usan la service role.
-
-Relevancia: 0 no relacionado, 1 tangencial, 2 relevante, 3 señal prioritaria.
-
-La migración está en `supabase/migrations/`. `supabase/seed.sql` carga el sector de ejemplo, sin titulares. Los titulares de producción los inserta la ingesta. Los del modo demo son fixtures sintéticos.
-
-## Añadir un sector
-
-1. Copia `data/sectors/renewable-energy.json` a `data/sectors/<slug>.json`.
-2. Cambia `slug`, nombre, descripción, temas (`keywords` incluidas) y fuentes. Solo URLs `http` o `https` públicas. `kind` es `rss` o `google_news`.
-3. En local, `TRENDWATCH_SECTOR_SLUG=<slug>`. En modo demo verás las fuentes y un feed vacío hasta que exista un job. El sector `renewable-energy` trae titulares de demostración.
-4. Con Supabase configurado: `python scripts/seed_sector.py`. Hace upsert por slug y desactiva temas o fuentes que hayas quitado del archivo. No borra noticias.
-5. El cron diario usa `TRENDWATCH_SECTOR_SLUG`. Un sector nuevo es otro archivo y otra variable, no un cambio de código.
-
-## Arranque rápido
-
-Hace falta Node 20.9+ y, para los jobs, Python 3.11.
+Hace falta Node 20.9 o superior. No hace falta Python, Supabase ni una clave de modelo.
 
 ```bash
 cp .env.example .env.local
@@ -105,76 +57,62 @@ npm install
 npm run dev
 ```
 
-Abre http://localhost:3000. Con `TRENDWATCH_DEMO_MODE=true`, o sin URL y anon key de Supabase, arranca el modo demo.
+Abre http://localhost:3000. El sector de ejemplo es energía renovable: titulares ficticios y URLs de feeds públicos reales.
 
-```bash
-npm test
-npm run lint
-npm run typecheck
-pip install -r scripts/requirements.txt
-pytest
-ruff check scripts
+Jobs, variables, otro sector y tests: [desarrollo](docs/desarrollo.md).
+
+## Cómo funciona
+
+```mermaid
+flowchart LR
+  RSS[Feeds públicos] --> ING[Ingesta diaria]
+  ING --> LLM[Modelo]
+  LLM --> DB[(Postgres o modo demo)]
+  ING --> DB
+  DB --> UI[Panel de revisión]
+  REP[Informe semanal] --> LLM
+  REP --> DB
 ```
 
-Jobs, cuando existan las claves:
+La ingesta lee el RSS, pide una relevancia y un motivo, y agrupa titulares que cuentan la misma historia. El informe semanal redacta a partir de lo ya clasificado. El panel lee esos datos. En demo, los titulares de ejemplo viven en el repo y la base no hace falta.
 
-```bash
-python scripts/seed_sector.py
-python scripts/ingest.py
-python scripts/dedup.py
-python scripts/weekly_report.py
-```
-
-El informe semanal cubre el lunes–domingo UTC anterior. El cron está los lunes a las 07:00 UTC, después de la ingesta de las 06:00 UTC. La agrupación une titulares con bastante solapamiento de tokens normalizados y, en la zona gris, pregunta al modelo si es la misma noticia.
-
-## Despliegue
-
-La app es un proyecto Next.js y se despliega en Vercel. Los jobs no corren en Vercel: corren en GitHub Actions.
-
-Secretos de Actions (`daily_sync.yml` y `weekly_report.yml`):
-
-| Secreto | Obligatorio |
-| --- | --- |
-| `TRENDWATCH_SUPABASE_URL` | Sí |
-| `TRENDWATCH_SUPABASE_SERVICE_ROLE_KEY` | Sí. Solo en el servidor y en Actions. |
-| `TRENDWATCH_GEMINI_API_KEY` | Sí |
-| `TRENDWATCH_GEMINI_MODEL` | No. Por defecto `gemini-2.5-flash`. |
-| `TRENDWATCH_SECTOR_SLUG` | No. Por defecto `renewable-energy`. |
-
-Variables en Vercel:
-
-| Variable | Uso |
-| --- | --- |
-| `TRENDWATCH_DEMO_MODE` | `false` cuando Supabase esté listo |
-| `TRENDWATCH_SECTOR_SLUG` | Sector visible |
-| `TRENDWATCH_SUPABASE_URL` | Lectura |
-| `TRENDWATCH_SUPABASE_ANON_KEY` | Lectura. Es pública por diseño; RLS limita lo que puede hacer. |
-| `TRENDWATCH_SUPABASE_SERVICE_ROLE_KEY` | Guardar revisiones y fuentes nuevas. No llega al navegador. |
-
-Gemini no hace falta en Vercel. La app no llama al modelo.
-
-Antes del primer deploy: aplica la migración y `supabase/seed.sql`, o `python scripts/seed_sector.py`.
-
-Al añadir un feed, el servidor solo acepta `http`/`https`, sin usuario ni contraseña, en el puerto 80 o 443. Resuelve el host y rechaza loopback, redes privadas, link-local (incluida la metadata de los cloud) y nombres como `localhost` o `*.internal`. Las redirecciones se vuelven a comprobar. Hay una ventana de DNS rebinding entre la resolución y la conexión; cerrarla fijando la IP está en la hoja de ruta.
+Detalle del modelo de datos, de la seguridad de las filas y de las migraciones: [datos](docs/datos.md).
 
 ## IA con criterio
 
-- El modelo clasifica y redacta. No borra, no envía mensajes y no opera sobre cuentas o mercados.
-- Descartar es un estado. Deshacer vuelve a pendiente.
-- Coste orientativo: una llamada por noticia nueva, otra si dos titulares caen en la zona gris de duplicados, y una por informe semanal. El plan gratuito de Gemini y el de Supabase tienen cupos; si se agotan, el job falla y la fuente queda con el error a la vista.
-- Puede equivocar el tema o la relevancia. La cola de revisión es humana.
-- Los titulares de los medios siguen siendo de sus autores. Guardamos título, enlace y un extracto corto.
+- El modelo clasifica titulares y redacta el informe. La revisión humana marca qué seguir.
+- Descartar guarda un estado. Deshacer vuelve a pendiente. La noticia permanece.
+- Cada noticia nueva es una llamada. Otra, si dos titulares quedan en la zona gris de duplicados. Una más, por el informe de la semana. El plan gratuito de Gemini y el de Supabase tienen cupo. Si se agota, el job falla y el error queda a la vista en la fuente.
+- El tema o la relevancia pueden fallar. Por eso existe la cola.
+- De cada medio se guarda título, enlace y un extracto corto. El texto sigue siendo de quien lo publicó.
 - Los titulares del modo demo son ficticios, escritos para este repo. Las URLs de las fuentes sí son feeds públicos.
+
+## Stack
+
+| Pieza | Para qué |
+| --- | --- |
+| Next.js, React y Tailwind | Panel, modo demo y validación del feed al darlo de alta |
+| Supabase Postgres | Sector, noticias, informes y políticas de fila |
+| Python 3.11 | Ingesta diaria, duplicados e informe semanal |
+| Gemini | Clasificación y redacción, detrás de una interfaz sustituible en tests |
+| GitHub Actions | CI, cron diario y cron del lunes |
+| Vercel | El panel. Los jobs corren en Actions |
 
 ## Hoja de ruta
 
-- Embeddings opcionales para la deduplicación, detrás de la misma interfaz.
-- Sesión de Supabase Auth en la interfaz, usando las políticas que ya limitan el update al estado.
+- Embeddings opcionales para agrupar historias, detrás de la misma interfaz.
+- Sesión de Supabase Auth en el panel, con las políticas que ya limitan el cambio al estado de revisión.
 - Varios sectores en la misma vista.
-- Aviso cuando una alerta supera un umbral.
-- Clasificación por lotes si el volumen deja pequeño el cupo gratuito.
-- Fijar la IP resuelta al descargar el feed.
+- Aviso cuando una alerta pasa un umbral.
+- Clasificación por lotes si el volumen se come el cupo gratuito.
+- Fijar la IP resuelta al descargar un feed.
 
-## Temas sugeridos en GitHub
+## Documentación
 
-`market-intelligence` `rss` `nextjs` `supabase` `gemini` `llm` `python` `portfolio` `renewable-energy`
+- [Desarrollo, tests y un sector nuevo](docs/desarrollo.md)
+- [Modelo de datos y migraciones](docs/datos.md)
+- [Despliegue, variables y workflows](docs/despliegue.md)
+
+## Licencia y autor
+
+[MIT](LICENSE). Hecho por [Carlos Alva](https://coalva94.github.io).
