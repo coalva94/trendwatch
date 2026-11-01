@@ -1,0 +1,35 @@
+name: Weekly report
+
+on:
+  schedule:
+    # Monday 07:00 UTC, after the daily ingest. Covers the previous calendar week.
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install Python dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Write the weekly brief
+        run: python scripts/weekly_report.py
+        env:
+          PYTHONPATH: scripts
+          TRENDWATCH_SUPABASE_URL: ${{ secrets.TRENDWATCH_SUPABASE_URL }}
+          TRENDWATCH_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TRENDWATCH_SUPABASE_SERVICE_ROLE_KEY }}
+          TRENDWATCH_GEMINI_API_KEY: ${{ secrets.TRENDWATCH_GEMINI_API_KEY }}
+          TRENDWATCH_GEMINI_MODEL: ${{ secrets.TRENDWATCH_GEMINI_MODEL }}
+          TRENDWATCH_SECTOR_SLUG: ${{ secrets.TRENDWATCH_SECTOR_SLUG }}

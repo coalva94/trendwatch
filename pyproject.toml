@@ -1,0 +1,18 @@
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+testpaths = ["scripts/tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+src = ["scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/ingest.py" = ["E402"]
+"scripts/dedup.py" = ["E402"]
+"scripts/weekly_report.py" = ["E402"]
+"scripts/seed_sector.py" = ["E402"]
