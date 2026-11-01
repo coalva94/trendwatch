@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { FileText } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
+import { PageHeader } from "@/components/page-header";
 import { ReportView } from "@/components/report-view";
 import { loadWorkspace } from "@/lib/data/repository";
 
@@ -9,18 +12,17 @@ export default async function ReportPage() {
   const workspace = await loadWorkspace();
   return (
     <div className="space-y-5">
-      <section>
-        <h1 className="font-serif text-4xl tracking-tight">Informe</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">
-          El job semanal redacta tendencias, oportunidades, alertas y eventos a partir de las noticias ya clasificadas. No publica ni borra fuentes.
-        </p>
-      </section>
+      <PageHeader
+        kicker="Semana"
+        title="Informe"
+        description="El job semanal redacta tendencias, oportunidades, alertas y eventos a partir de las noticias ya clasificadas. No publica ni borra fuentes."
+      />
       {workspace.report ? (
         <ReportView report={workspace.report} />
       ) : (
-        <p className="rounded-2xl border border-dashed border-line px-4 py-8 text-sm text-muted">
+        <EmptyState icon={FileText} title="Sin informe todavía">
           Todavía no hay un informe para {workspace.sector.name}.
-        </p>
+        </EmptyState>
       )}
     </div>
   );

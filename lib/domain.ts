@@ -86,6 +86,34 @@ export function clusterMates(items: Item[], item: Item): Item[] {
   );
 }
 
+export type DayPoint = {
+  date: string;
+  label: string;
+  count: number;
+  high: number;
+};
+
+const weekday = new Intl.DateTimeFormat("es", { weekday: "short", timeZone: "UTC" });
+
+export function dailyCounts(items: Item[], now: Date): DayPoint[] {
+  const start = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const points: DayPoint[] = [];
+  for (let offset = 6; offset >= 0; offset -= 1) {
+    const time = start - offset * 24 * 60 * 60 * 1000;
+    const date = new Date(time).toISOString().slice(0, 10);
+    const label = weekday.format(new Date(time)).replace(/\./g, "");
+    points.push({ date, label, count: 0, high: 0 });
+  }
+  const byDate = new Map(points.map((point) => [point.date, point]));
+  for (const item of items) {
+    const point = byDate.get(item.publishedAt.slice(0, 10));
+    if (!point) continue;
+    point.count += 1;
+    if ((item.relevance ?? -1) >= 2) point.high += 1;
+  }
+  return points;
+}
+
 export function formatRelative(iso: string, now: Date): string {
   const delta = now.getTime() - Date.parse(iso);
   if (Number.isNaN(delta)) return iso;

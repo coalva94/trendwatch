@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   computeKpis,
+  dailyCounts,
   formatRelative,
   hiddenDuplicateCount,
   visibleItems,
@@ -119,5 +120,31 @@ describe("visibleItems", () => {
 describe("formatRelative", () => {
   it("speaks in hours", () => {
     expect(formatRelative("2026-11-01T09:00:00Z", now)).toBe("hace 3 h");
+  });
+});
+
+describe("dailyCounts", () => {
+  it("buckets the last 7 UTC days and splits high relevance", () => {
+    const points = dailyCounts(
+      [
+        item({ id: "today", title: "Hoy", publishedAt: "2026-11-01T08:00:00Z", relevance: 3 }),
+        item({ id: "edge", title: "Borde", publishedAt: "2026-10-26T23:00:00Z", relevance: 1 }),
+        item({ id: "old", title: "Fuera", publishedAt: "2026-10-25T23:00:00Z", relevance: 3 }),
+      ],
+      now,
+    );
+    expect(points.map((point) => point.date)).toEqual([
+      "2026-10-26",
+      "2026-10-27",
+      "2026-10-28",
+      "2026-10-29",
+      "2026-10-30",
+      "2026-10-31",
+      "2026-11-01",
+    ]);
+    expect(points[0]).toMatchObject({ count: 1, high: 0 });
+    expect(points[6]).toMatchObject({ count: 1, high: 1 });
+    expect(points.slice(1, 6).every((point) => point.count === 0)).toBe(true);
+    expect(points.every((point) => point.label.length > 0)).toBe(true);
   });
 });

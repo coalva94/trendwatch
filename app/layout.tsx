@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Mono, Outfit } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 
-import { SiteFooter, SiteHeader } from "@/components/site-header";
+import { AppShell } from "@/components/app-shell";
 import { loadWorkspace } from "@/lib/data/repository";
 
 import "./globals.css";
 
-const sans = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
-const serif = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
-const mono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex",
-});
+const sans = Geist({ subsets: ["latin"], variable: "--font-geist" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+
+const themeScript = `(function(){try{var m=document.cookie.match(/(?:^|; )trendwatch_theme=([^;]+)/);var light=m&&decodeURIComponent(m[1])==="light";document.documentElement.classList.toggle("light",!!light);document.documentElement.classList.toggle("dark",!light);}catch(e){document.documentElement.classList.add("dark");}})();`;
 
 export const metadata: Metadata = {
   title: {
@@ -28,11 +25,18 @@ export const dynamic = "force-dynamic";
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const workspace = await loadWorkspace();
   return (
-    <html lang="es" className={`${sans.variable} ${serif.variable} ${mono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <SiteHeader sectorName={workspace.sector.name} demo={workspace.demoMode} />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
-          <SiteFooter />
+    <html
+      lang="es"
+      className={`${sans.variable} ${mono.variable} h-full antialiased dark`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="min-h-full bg-bg text-ink">
+        <AppShell sectorName={workspace.sector.name} demo={workspace.demoMode}>
+          {children}
+        </AppShell>
       </body>
     </html>
   );

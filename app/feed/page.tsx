@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { Inbox } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { FeedFiltersForm } from "@/components/feed-filters";
 import { ItemCard } from "@/components/item-card";
+import { PageHeader } from "@/components/page-header";
 import { clusterMates, hiddenDuplicateCount, isItemStatus, isRelevance, visibleItems } from "@/lib/domain";
 import { loadWorkspace } from "@/lib/data/repository";
 import type { FeedFilters, Relevance } from "@/lib/types";
@@ -36,12 +39,11 @@ export default async function FeedPage({
 
   return (
     <div className="space-y-5">
-      <section>
-        <h1 className="font-serif text-4xl tracking-tight">Feed</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">
-          Interesante, seguir y descartar cambian el estado. Deshacer vuelve a pendiente. Ninguna acción borra la noticia.
-        </p>
-      </section>
+      <PageHeader
+        kicker="Revisión"
+        title="Feed"
+        description="Interesante, seguir y descartar cambian el estado. Deshacer vuelve a pendiente. Ninguna acción borra la noticia."
+      />
       <FeedFiltersForm
         filters={filters}
         topics={workspace.topics}
@@ -50,11 +52,11 @@ export default async function FeedPage({
         hidden={hidden}
       />
       {visible.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line px-4 py-8 text-sm text-muted">
+        <EmptyState icon={Inbox} title={workspace.items.length === 0 ? "Todavía vacío" : "Sin coincidencias"}>
           {workspace.items.length === 0
             ? "Este sector todavía no tiene noticias. Llegarán con la ingesta diaria."
             : "Ninguna noticia coincide con el filtro."}
-        </p>
+        </EmptyState>
       ) : (
         <div className="space-y-3">
           {visible.map((item) => (

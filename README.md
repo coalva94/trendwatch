@@ -14,7 +14,7 @@ Hecho como proyecto de portafolio por [Carlos Alva](https://github.com/coalva94)
 
 ## Pantallas
 
-Modo demo, sin claves.
+Modo demo, sin claves. La interfaz abre en modo oscuro; el interruptor de la barra lateral pasa a claro.
 
 ![Inicio: KPIs de 7 días, cola de revisión, sincronización e informe](docs/screenshots/home.png)
 
