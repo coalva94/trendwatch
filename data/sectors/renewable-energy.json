@@ -1,0 +1,87 @@
+{
+  "slug": "renewable-energy",
+  "name": "Energía renovable",
+  "description": "Solar, eólica, almacenamiento, redes y política energética. Las fuentes son feeds públicos y consultas de Google News.",
+  "topics": [
+    {
+      "slug": "solar",
+      "name": "Solar fotovoltaica",
+      "description": "Módulos, plantas, fabricación y contratos solares.",
+      "keywords": ["solar", "photovoltaic", "pv", "module", "inverter"]
+    },
+    {
+      "slug": "wind",
+      "name": "Eólica",
+      "description": "Parques terrestres, offshore y cadena de suministro de turbinas.",
+      "keywords": ["wind", "offshore", "turbine", "auction"]
+    },
+    {
+      "slug": "storage",
+      "name": "Almacenamiento e hidrógeno",
+      "description": "Baterías, hidrógeno y otros vectores de flexibilidad.",
+      "keywords": ["battery", "storage", "hydrogen", "electrolyser", "lfp"]
+    },
+    {
+      "slug": "policy",
+      "name": "Política y subastas",
+      "description": "Regulación, subastas, subsidios y PPAs.",
+      "keywords": ["policy", "auction", "tariff", "ppa", "regulation"]
+    },
+    {
+      "slug": "grids",
+      "name": "Redes y demanda",
+      "description": "Transmisión, curtailment, interconexión y demanda.",
+      "keywords": ["grid", "curtailment", "transmission", "interconnection", "demand"]
+    }
+  ],
+  "sources": [
+    {
+      "slug": "google-news-solar",
+      "name": "Google News · Solar",
+      "kind": "google_news",
+      "url": "https://news.google.com/rss/search?q=solar+photovoltaic+energy+when:7d&hl=en-US&gl=US&ceid=US:en"
+    },
+    {
+      "slug": "google-news-wind",
+      "name": "Google News · Eólica",
+      "kind": "google_news",
+      "url": "https://news.google.com/rss/search?q=offshore+wind+power+when:7d&hl=en-US&gl=US&ceid=US:en"
+    },
+    {
+      "slug": "google-news-storage",
+      "name": "Google News · Almacenamiento",
+      "kind": "google_news",
+      "url": "https://news.google.com/rss/search?q=battery+storage+renewable+energy+when:7d&hl=en-US&gl=US&ceid=US:en"
+    },
+    {
+      "slug": "google-news-policy",
+      "name": "Google News · Política",
+      "kind": "google_news",
+      "url": "https://news.google.com/rss/search?q=renewable+energy+policy+auction+when:7d&hl=en-US&gl=US&ceid=US:en"
+    },
+    {
+      "slug": "pv-magazine",
+      "name": "pv magazine",
+      "kind": "rss",
+      "url": "https://www.pv-magazine.com/feed/"
+    },
+    {
+      "slug": "cleantechnica",
+      "name": "CleanTechnica",
+      "kind": "rss",
+      "url": "https://cleantechnica.com/feed/"
+    },
+    {
+      "slug": "canary-media",
+      "name": "Canary Media",
+      "kind": "rss",
+      "url": "https://www.canarymedia.com/rss.rss"
+    },
+    {
+      "slug": "renewable-energy-world",
+      "name": "Renewable Energy World",
+      "kind": "rss",
+      "url": "https://www.renewableenergyworld.com/feed/"
+    }
+  ]
+}
