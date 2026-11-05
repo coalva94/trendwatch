@@ -92,7 +92,7 @@ class FakeLLM:
             opportunities=[],
             alerts=[],
             upcoming_events=[],
-            narrative="Resumen de prueba construido con los titulares de la semana.",
+            narrative="Informe armado con los titulares ya clasificados, sin modelo.",
         )
 
 

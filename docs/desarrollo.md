@@ -19,7 +19,7 @@ Los tests sustituyen la base y el modelo por dobles en memoria. No hace falta re
 
 ## Jobs
 
-Con Supabase y Gemini configurados:
+Sin claves, los scripts leen `.env` y `.env.local` y siguen adelante. La clasificación usa las palabras clave del sector, no un modelo. Los datos quedan en `data/local/store.json`, que no se versiona. Con `TRENDWATCH_SUPABASE_URL` (https) y `TRENDWATCH_SUPABASE_SERVICE_ROLE_KEY` escriben en Supabase. `TRENDWATCH_GEMINI_API_KEY` es opcional: si está, Gemini clasifica, compara la zona gris de duplicados y redacta el informe.
 
 ```bash
 python scripts/seed_sector.py
@@ -28,7 +28,7 @@ python scripts/dedup.py
 python scripts/weekly_report.py
 ```
 
-La ingesta diaria también agrupa duplicados al terminar. `scripts/dedup.py` repite solo ese paso. La agrupación une titulares con bastante solapamiento de tokens normalizados. En la zona gris pregunta al modelo si es la misma noticia.
+La ingesta diaria también agrupa duplicados al terminar. `scripts/dedup.py` repite solo ese paso. La agrupación une titulares con bastante solapamiento de tokens normalizados. En la zona gris, y solo si hay clave de Gemini, pregunta al modelo si es la misma noticia.
 
 El informe semanal cubre el lunes a domingo UTC anterior. El cron de GitHub Actions corre los lunes a las 07:00 UTC, después de la ingesta de las 06:00 UTC. Horarios, secretos y el panel en Vercel: [despliegue](despliegue.md).
 
